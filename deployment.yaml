@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq-master
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-master
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-worker-deployment
+spec:
+  selector:
+    matchLabels:
+      app: rabbit-worker
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: rabbit-worker
+    spec:
+      containers:
+      - name: rabbit-worker
+        image: yuy910616/rabbit-worker
+        env:
+          - name: PYTHONUNBUFFERED
+            value: "0"
