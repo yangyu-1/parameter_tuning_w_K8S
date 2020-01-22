@@ -29,7 +29,7 @@ spec:
   selector:
     matchLabels:
       app: rabbit-worker
-  replicas: 1 
+  replicas: 10 
   template:
     metadata:
       labels:
@@ -38,6 +38,7 @@ spec:
       containers:
       - name: rabbit-worker
         image: yuy910616/rabbit-worker
+        imagePullPolicy: "Always"
         env:
           - name: PYTHONUNBUFFERED
             value: "0"
