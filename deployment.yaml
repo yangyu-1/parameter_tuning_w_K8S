@@ -18,6 +18,8 @@ spec:
         ports:
         - containerPort: 5672
         - containerPort: 15672
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "default-pool"
 
 ---
 
@@ -29,7 +31,7 @@ spec:
   selector:
     matchLabels:
       app: rabbit-worker
-  replicas: 10 
+  replicas: 2 
   template:
     metadata:
       labels:
@@ -42,3 +44,14 @@ spec:
         env:
           - name: PYTHONUNBUFFERED
             value: "0"
+        resources:
+          requests:
+            memory: "10Gi"
+            cpu: "15.5"
+          limits:
+            memory: "10Gi"
+            cpu: "15.5"
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "pool-1"
+
+
