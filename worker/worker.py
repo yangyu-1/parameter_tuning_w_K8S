@@ -2,10 +2,16 @@ import time
 import pika
 from trainer import trainer
 import json
+import socket
 
-
-# connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq-service"))
-connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
+try:
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host="rabbitmq-service", heartbeat=600)
+    )
+except socket.gaierror:
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host="localhost", heartbeat=600)
+    )
 channel = connection.channel()
 
 channel.queue_declare(queue="task_queue", durable=True)

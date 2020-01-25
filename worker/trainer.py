@@ -18,7 +18,7 @@ def result_to_df(regressor, results, model, timer):
     return local_result
 
 
-def trainer(param_grids: list, folds=10):
+def trainer(param_grids: list, folds=5):
     X, y = fetch_california_housing(return_X_y=True)
     output = pd.DataFrame()
     print(f"length of param grid received {len(param_grids)}")
@@ -28,7 +28,7 @@ def trainer(param_grids: list, folds=10):
             regressor = XGBRegressor(objective="reg:squarederror", **param)
             kfold = KFold(n_splits=folds)
             tic = time.perf_counter()
-            results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=15)
+            results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
             timer = round(time.perf_counter() - tic, 4)
             local_result = result_to_df(regressor, results, model, timer)
             output = pd.concat([output, local_result])
