@@ -66,6 +66,16 @@ spec:
             claimName: mongodb-pvc
       nodeSelector:
         cloud.google.com/gke-nodepool: "default-pool"
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-svc
+spec: 
+  ports:
+  - port: 27017
+    protocol: TCP
+  selector: 
+    app: mongodb
 
 
