@@ -2,10 +2,18 @@ import json
 from xgboost import XGBRegressor
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.datasets import fetch_california_housing
+from pymongo import MongoClient
 from datetime import datetime
 import pandas as pd
 import socket
 import time
+
+
+def save_to_mongo(df):
+    client = MongoClient("mongodb://mongo-svc:27017/")
+    db = client.test
+    db.test.insert_many(df.to_dict("records"))
+    print("Saved to MongoDB")
 
 
 def result_to_df(regressor, results, model, timer):
@@ -38,4 +46,5 @@ def trainer(param_grids: list, folds=5):
             pass
         else:
             print(f"model {model} is not supported")
+    save_to_mongo(output)
     print(output)
