@@ -1,5 +1,6 @@
 import json
 from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.datasets import fetch_california_housing
 from pymongo import MongoClient
@@ -41,7 +42,12 @@ def trainer(param_grids: list, folds=5):
             local_result = result_to_df(regressor, results, model, timer)
             output = pd.concat([output, local_result])
         elif model == "lightgbm":
-            pass
+            regressor = LGBMRegressor(**param)
+            kfold = KFold(n_splits=folds)
+            tic = time.perf_counter()
+            results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
+            timer = round(time.perf_counter() - tic, 4)
+            local_result = result_to_df(regressor, results, model, timer)
         elif model == "catboost":
             pass
         else:
