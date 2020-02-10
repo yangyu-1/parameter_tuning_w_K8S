@@ -17,13 +17,28 @@ def save_to_mongo(df):
     print("Saved to MongoDB")
 
 
-def result_to_df(regressor, results, model, timer):
+def make_results_df(regressor, results, model, timer):
+    """
+    Build a dataframe for the training results.
+    """
     local_result = pd.DataFrame([regressor.get_params()])
     local_result["result_mean"] = results.mean()
     local_result["model_type"] = model
     local_result["host_name"] = socket.gethostname()
     local_result["date_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     local_result["execute_time"] = timer
+    return local_result
+
+
+def training_pipeline(regressor, fold):
+    """
+    Run through the trining pipeline
+    """
+    kfold = KFold(n_splits=folds)
+    tic = time.perf_counter()
+    results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
+    timer = round(time.perf_counter() - tic, 4)
+    local_result = make_results_df(regressor, results, model, timer)
     return local_result
 
 
@@ -35,19 +50,12 @@ def trainer(param_grids: list, folds=5):
         model = param.pop("model")
         if model == "xgboost":
             regressor = XGBRegressor(objective="reg:squarederror", **param)
-            kfold = KFold(n_splits=folds)
-            tic = time.perf_counter()
-            results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
-            timer = round(time.perf_counter() - tic, 4)
-            local_result = result_to_df(regressor, results, model, timer)
+            local_result = training_pipeline(regressor, fold)
             output = pd.concat([output, local_result])
         elif model == "lightgbm":
             regressor = LGBMRegressor(**param)
-            kfold = KFold(n_splits=folds)
-            tic = time.perf_counter()
-            results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
-            timer = round(time.perf_counter() - tic, 4)
-            local_result = result_to_df(regressor, results, model, timer)
+            local_result = training_pipeline(regressor, fold)
+            output = pd.concat([output, local_result])
         elif model == "catboost":
             pass
         else:
