@@ -1,6 +1,7 @@
 import json
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.datasets import fetch_california_housing
 from pymongo import MongoClient
@@ -10,11 +11,12 @@ import socket
 import time
 
 
-def save_to_mongo(df):
+def save_to_mongo(df, model: str):
     client = MongoClient("mongodb://mongo-svc:27017/")
-    db = client.test
-    db.test.insert_many(df.to_dict("records"))
-    print("Saved to MongoDB")
+    db = client["test"]
+    db[model].insert_many(df.to_dict("records"))
+    record_count = db[model].count_documents({})
+    print(f"Model Saved to DB. Doc Count {record_count}")
 
 
 def make_results_df(regressor, results, model, timer):
@@ -30,11 +32,26 @@ def make_results_df(regressor, results, model, timer):
     return local_result
 
 
-def training_pipeline(regressor, fold):
+def training_pipeline(regressor, fold: int, model: str) -> pd.DataFrame:
+    """Run the regressor "fold" times
+        Output the result to a DF
+
+    Parameters
+    ----------
+    regressor : XGBRegressor, LGBMRegressor, or CatBoostRegressor
+        A regressor object with params already feed in
+    fold : int
+        Number of times the data should be split, train, and evaluated.
+    model : str
+        Name of the model. 'xgboost', 'lightgbm', or 'catboost'
+
+    Returns
+    -------
+    local_result: pd.DataFrame
+        Result dataframe
     """
-    Run through the trining pipeline
-    """
-    kfold = KFold(n_splits=folds)
+    X, y = fetch_california_housing(return_X_y=True)
+    kfold = KFold(n_splits=fold)
     tic = time.perf_counter()
     results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
     timer = round(time.perf_counter() - tic, 4)
@@ -42,23 +59,21 @@ def training_pipeline(regressor, fold):
     return local_result
 
 
-def trainer(param_grids: list, folds=5):
-    X, y = fetch_california_housing(return_X_y=True)
-    output = pd.DataFrame()
+def trainer(param_grids: list, fold=5):
     print(f"length of param grid received {len(param_grids)}")
     for param in param_grids:
         model = param.pop("model")
         if model == "xgboost":
             regressor = XGBRegressor(objective="reg:squarederror", **param)
-            local_result = training_pipeline(regressor, fold)
-            output = pd.concat([output, local_result])
+            local_result = training_pipeline(regressor, fold, model)
+            save_to_mongo(local_result, model)
         elif model == "lightgbm":
             regressor = LGBMRegressor(**param)
-            local_result = training_pipeline(regressor, fold)
-            output = pd.concat([output, local_result])
+            local_result = training_pipeline(regressor, fold, model)
+            save_to_mongo(local_result, model)
         elif model == "catboost":
-            pass
+            regressor = CatBoostRegressor(**param)
+            local_result = training_pipeline(regressor, fold, model)
+            save_to_mongo(local_result, model)
         else:
             print(f"model {model} is not supported")
-    save_to_mongo(output)
-    print(output)

@@ -22,6 +22,7 @@ def callback(ch, method, properties, body):
     j_data = json.loads(body)
     trainer(j_data)
     ch.basic_ack(delivery_tag=method.delivery_tag)
+    print("task complete. ready for new item")
 
 
 channel.basic_qos(prefetch_count=1)
