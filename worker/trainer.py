@@ -9,10 +9,11 @@ from datetime import datetime
 import pandas as pd
 import socket
 import time
+import os
 
 
 def save_to_mongo(df, model: str):
-    client = MongoClient("mongodb://mongo-svc:27017/")
+    client = MongoClient(os.environ['mongoService'])
     db = client["test"]
     db[model].insert_many(df.to_dict("records"))
     record_count = db[model].count_documents({})
