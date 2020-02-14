@@ -7,7 +7,7 @@ import os
 
 
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=os.environ['rabbitService'], heartbeat=600)
+    pika.ConnectionParameters(host=os.environ["rabbitService"], heartbeat=600)
 )
 
 channel = connection.channel()

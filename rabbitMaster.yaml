@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq-master
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-master
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "default-pool"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rabbitmq-master
+  name: rabbitmq-service
+spec:
+  ports:
+    - port: 5672
+      name: queue
+      targetPort: 5672
+    - port: 15672
+      name: management
+      targetPort: 15672
+  selector:
+    app: rabbitmq-master
+  

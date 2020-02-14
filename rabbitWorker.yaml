@@ -1,31 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rabbitmq-deployment
-spec:
-  selector:
-    matchLabels:
-      app: rabbitmq-master
-  replicas: 1 
-  template:
-    metadata:
-      labels:
-        app: rabbitmq-master
-    spec:
-      containers:
-      - name: rabbitmq
-        image: rabbitmq:3-management
-        ports:
-        - containerPort: 5672
-        - containerPort: 15672
-      nodeSelector:
-        cloud.google.com/gke-nodepool: "default-pool"
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: rabbitmq-worker-deployment
 spec:
   selector:
@@ -44,6 +19,16 @@ spec:
         env:
           - name: PYTHONUNBUFFERED
             value: "0"
+          - name: mongoService
+            valueFrom:
+              configMapKeyRef:
+                name: prod-config
+                key: mongoService
+          - name: rabbitService
+            valueFrom:
+              configMapKeyRef:
+                name: prod-config
+                key: rabbitService
         resources:
           requests:
             memory: "750Mi"
@@ -54,4 +39,11 @@ spec:
       nodeSelector:
         cloud.google.com/gke-nodepool: "pool-1"
 
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prod-config
+data:
+  mongoService: "mongodb://mongo-svc:27017/"
+  rabbitService: "rabbitmq-service"
