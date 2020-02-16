@@ -13,6 +13,8 @@ import os
 
 
 def save_to_mongo(df, model: str):
+    if df.empty:
+        raise ValueError('DataFrame is empty!')
     client = MongoClient(os.environ['mongoService'])
     db = client["test"]
     db[model].insert_many(df.to_dict("records"))
@@ -54,9 +56,10 @@ def training_pipeline(regressor, fold: int, model: str) -> pd.DataFrame:
     X, y = fetch_california_housing(return_X_y=True)
     kfold = KFold(n_splits=fold)
     tic = time.perf_counter()
-    results = cross_val_score(regressor, X, y, cv=kfold, n_jobs=1)
+    results = cross_val_score(regressor, X, y, cv=kfold,scoring='neg_root_mean_squared_error', n_jobs=1)
     timer = round(time.perf_counter() - tic, 4)
     local_result = make_results_df(regressor, results, model, timer)
+    print(local_result.head())
     return local_result
 
 
