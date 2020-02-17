@@ -8,9 +8,9 @@ This tutorial will be using Google Cloud Platform. This is mostly because at the
 #### Assumption
 This is not a beginner tutorial. See the following assumptions:  
 
-- Knowledge of Python (pandas, scikit, numpy).
-- Some Knowledge of machine learning (xgboost, catboost, or lightGBM. And parameter tuning)
-- Some Knowledge of Docker (start, stop containers. Working with ports)
+- Knowledge of Python (pandas, scikit, numpy) is assumed.
+- Some Knowledge of machine learning (xgboost, catboost, or lightGBM. And parameter tuning) is assumed
+- Some Knowledge of Docker (start, stop containers. Working with ports) is assumed
 - Knowledge of GCP, message queues, and mongoDB will be helpful but not needed 
 - Prior knowledge of Kubernetes is **not** assumed
 
