@@ -19,12 +19,12 @@ Here is our overall structure:
    - Kubernetes Resources used: Deployment, Service
 
 3. Workers: Workers reads messages from message queue. Each message contains a specific model parameter. Workers then builds regression models with the parameters (eg. search_depth = 3, or num_leaves = 50), and calculates a result mean. Finally, the worker saves the result to our mongoDB database, and sends back an acknowledgement to the MQ to signal task completion before starting on the next task.
-   - Kubernetes Resources user: Deployment with specific resource constraints, ConfigMap 
+   - Kubernetes Resources used: Deployment with specific resource constraints, ConfigMap 
 
 4. Database: Database is where results from workers are stored. There are plenty of open source and hosted database technologies. Here we'll host our own mongoDB, since it requires very little set up in order to save data.
-   - Kubernetes Resources user: PersistentVolume, PersistentVolumeClaim, ReplicaSet, Service  
+   - Kubernetes Resources used: PersistentVolume, PersistentVolumeClaim, ReplicaSet, Service  
 
 5. Front-end (Optional): An simple flask front end app that connects to our mongoDB database
-   - Kubernetes Resources user: Deployment, Service (NodePort)
+   - Kubernetes Resources used: Deployment, Service (NodePort)
   
 6. AutoScaler (Optional): #TODO 
