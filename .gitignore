@@ -133,3 +133,7 @@ dmypy.json
 
 # catboost
 catboost_info
+
+.DS_Store
+
+*/venv
