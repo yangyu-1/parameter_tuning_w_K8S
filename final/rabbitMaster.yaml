@@ -24,8 +24,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: rabbitmq-master
   name: rabbitmq-service
 spec:
   ports:
